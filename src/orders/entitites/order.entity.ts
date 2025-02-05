@@ -1,22 +1,19 @@
 import { Schema, Document } from 'mongoose';
 
-export const OrdersSchema = new Schema({
-    date_orders: { type: Date, default: Date.now },
-    statut: { type: String, required: true },
-    id_client: { type: String, required: true },
-    total: { type: Number, required: true },
-    produits: [
-        {
-            id_produit: { type: String, required: true },
-            quantite: { type: Number, required: true },
-        },
-    ],
+export interface Order extends Document {
+  items: string[];
+  totalAmount: number;
+  status: 'En cours' | 'Terminé';
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export const OrderSchema = new Schema({
+  items: [String],
+  totalAmount: Number,
+  status: String,
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
-export interface orders extends Document {
-    date_orders: Date;
-    statut: string;
-    id_client: string;
-    total: number;
-    produits: { id_produit: string; quantite: number }[];
-}
+export class OrderEntity {}
