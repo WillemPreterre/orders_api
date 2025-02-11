@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersController } from '../orders.controller';
 import { OrdersService } from '../orders.service';
-import { ThrottlerModule } from '@nestjs/throttler'; // Import the ThrottlerModule if it's the source of THROTTLER:MODULE_OPTIONS
+import { ThrottlerModule } from '@nestjs/throttler';
 import { CreateOrderDto } from '../dto/create-order.dto';
 
 describe('OrdersController', () => {
@@ -30,8 +30,8 @@ describe('OrdersController', () => {
         throttlers: [
           {
             name: 'default',
-            ttl: 60, 
-            limit: 10, 
+            ttl: 60,
+            limit: 10,
           },
         ],
       })
@@ -39,7 +39,7 @@ describe('OrdersController', () => {
       controllers: [OrdersController],
       providers: [
         { provide: OrdersService, useValue: mockOrdersService },
-       
+
         {
           provide: 'THROTTLER:MODULE_OPTIONS',
           useValue: { ttl: 60, limit: 10 },
@@ -78,7 +78,7 @@ describe('OrdersController', () => {
   });
 
   it('Supprime une commande', async () => {
-       expect(await controller.remove('123e4567-e89b-12d3-a456-426614174000')).toEqual({ message: 'Commande Supprimé' });
+    expect(await controller.remove('123e4567-e89b-12d3-a456-426614174000')).toEqual({ message: 'Commande Supprimé' });
     expect(service.remove).toHaveBeenCalledWith('123e4567-e89b-12d3-a456-426614174000');
   });
 });
