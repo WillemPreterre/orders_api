@@ -6,4 +6,8 @@ module.exports = {
     moduleFileExtensions: ['js', 'json', 'ts'], 
     rootDir: './',
     testMatch: ['**/*.spec.ts'], 
+    coveragePathIgnorePatterns: [
+      "/node_modules/",
+      "src/orders/dto/"
+    ],
   };

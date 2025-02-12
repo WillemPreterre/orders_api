@@ -20,7 +20,7 @@ describe('OrdersController', () => {
     create: jest.fn().mockResolvedValue(mockOrder),
     findAll: jest.fn().mockResolvedValue([mockOrder]),
     findOne: jest.fn().mockResolvedValue(mockOrder),
-    update: jest.fn().mockResolvedValue({ ...mockOrder, status: 'Complété' }),
+    update: jest.fn().mockResolvedValue({ ...mockOrder, status: 'Terminé' }),
     remove: jest.fn().mockResolvedValue({ message: 'Commande Supprimé' }),
   };
 
