@@ -2,6 +2,7 @@ import { IsArray, IsNotEmpty, IsNumber, IsString, IsUUID, ValidateNested } from 
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
+// DTO pour un produit dans une commande
 class ProductDto {
     @IsString()
     @IsNotEmpty()
@@ -12,6 +13,7 @@ class ProductDto {
     quantity: number;
 }
 
+// DTO pour la création d'une commande
 export class CreateOrderDto {
     @ApiProperty({
         example: '123e4567-e89b-12d3-a456-426614174000',
@@ -37,7 +39,7 @@ export class CreateOrderDto {
     @IsNotEmpty()
     totalAmount: number;
 
-    @ApiProperty({ example: '', description: 'Statut de la commande' })
+    @ApiProperty({ example: 'En cours', description: 'Statut de la commande' })
     @IsString()
     @IsNotEmpty()
     status: string;
