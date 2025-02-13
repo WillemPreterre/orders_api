@@ -26,7 +26,7 @@ dotenv.config();
       ],
     }),
   ],
-  controllers: [AppController, OrdersController],
+  controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
