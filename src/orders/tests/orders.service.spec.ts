@@ -16,9 +16,8 @@ describe('OrdersService', () => {
         customerId: '12345',
         products: [{ productId: 'produit1', quantity: 2 }],
         totalAmount: 50.99,
-        status: 'en cours',
+        status: 'En cours',
     };
-
 
 
     const mockExec = (data) => ({
@@ -26,7 +25,7 @@ describe('OrdersService', () => {
             exec: jest.fn().mockResolvedValue(data),
         }),
     });
-    
+
     const mockOrderModel = {
         create: jest.fn().mockResolvedValue(mockOrder),
         find: jest.fn().mockReturnValue(mockExec([mockOrder])),
@@ -34,7 +33,7 @@ describe('OrdersService', () => {
         findByIdAndUpdate: jest.fn().mockImplementation((id, dto) => mockExec(id === mockOrder.orderId ? { ...mockOrder, ...dto } : null)),
         findByIdAndDelete: jest.fn().mockImplementation((id) => mockExec(id === mockOrder.orderId ? mockOrder : null)),
     };
-    
+
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -54,6 +53,7 @@ describe('OrdersService', () => {
                     provide: getModelToken(OrderEntity.name),
                     useValue: mockOrderModel,
                 },
+
             ],
         }).compile();
 
@@ -71,7 +71,7 @@ describe('OrdersService', () => {
                 customerId: '12345',
                 products: [{ productId: 'prod123', quantity: 2 }],
                 totalAmount: 50.99,
-                status: 'en cours',
+                status: 'En cours',
             };
 
             const result = await service.create(createOrderDto);

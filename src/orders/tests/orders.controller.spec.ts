@@ -13,7 +13,7 @@ describe('OrdersController', () => {
     customerId: '12345',
     products: [{ productId: 'produit1', quantity: 2 }],
     totalAmount: 50.99,
-    status: 'en cours',
+    status: 'En cours',
   };
 
   const mockOrdersService = {
