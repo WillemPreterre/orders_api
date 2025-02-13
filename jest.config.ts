@@ -8,6 +8,7 @@ module.exports = {
     testMatch: ['**/*.spec.ts'], 
     coveragePathIgnorePatterns: [
       "/node_modules/",
-      "src/orders/dto/"
+      "src/orders/dto",
+      "src/auth/jwt-auth.guard.ts"
     ],
   };

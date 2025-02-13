@@ -3,7 +3,7 @@ import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('orders') // Définit le chemin d'accès pour ce contrôleur
 @UseGuards(ThrottlerGuard) // Ajoute une protection contre les requêtes abusives
