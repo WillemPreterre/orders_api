@@ -6,23 +6,30 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { InjectMetric } from '@willsoto/nestjs-prometheus';
 import { Counter } from 'prom-client';
+import { EventPattern } from '@nestjs/microservices';
+import { RabbitMQService } from 'src/rabbitmq/rabbitmq.service';
 
 
 @Controller('orders') // Définit le chemin d'accès pour ce contrôleur
 @UseGuards(ThrottlerGuard) // Ajoute une protection contre les requêtes abusives
 export class OrdersController {
   constructor(
+    private readonly rabbitMQService: RabbitMQService,
+
     private readonly ordersService: OrdersService,
     @InjectMetric('orders_requests_total') private readonly ordersRequestsTotal: Counter,
+
   ) { }
   @Post()
   @UseGuards(JwtAuthGuard)
 
   async create(@Body() createOrderDto: CreateOrderDto) {
     // Crée une nouvelle commande
+    const order = this.ordersService.create(createOrderDto);
     this.ordersRequestsTotal.inc();
-
-    return this.ordersService.create(createOrderDto);
+    await this.rabbitMQService.sendOrderCreated(order);
+    return order
+    
   }
 
   @Get()
@@ -64,4 +71,5 @@ export class OrdersController {
     // Supprime une commande par son ID
     return this.ordersService.remove(id);
   }
+
 }
