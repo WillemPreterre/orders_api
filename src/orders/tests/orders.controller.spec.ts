@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersController } from '../orders.controller';
 import { OrdersService } from '../orders.service';
-import { ThrottlerModule } from '@nestjs/throttler';
 import { CreateOrderDto } from '../dto/create-order.dto';
 
 describe('OrdersController', () => {
@@ -26,16 +25,9 @@ describe('OrdersController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [ThrottlerModule.forRoot({
-        throttlers: [
-          {
-            name: 'default',
-            ttl: 60,
-            limit: 10,
-          },
-        ],
-      })
-      ],
+      imports: [],
+
+
       controllers: [OrdersController],
       providers: [
         { provide: OrdersService, useValue: mockOrdersService },

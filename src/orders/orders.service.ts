@@ -6,13 +6,29 @@ import { CreateOrderDto } from "./dto/create-order.dto";
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
 import { AuthGuard } from "@nestjs/passport";
 import { UpdateOrderDto } from "./dto/update-order.dto";
-import { ClientProxy } from "@nestjs/microservices";
+import { ClientProxy, ClientProxyFactory, Transport } from "@nestjs/microservices";
 
 @Injectable()
 export class OrdersService {
     // Injection du modèle OrderEntity pour interagir avec MongoDB
-    constructor(@InjectModel(OrderEntity.name) private readonly orderModel: Model<OrderEntity>) { }
+    private client: ClientProxy;
 
+    constructor(@InjectModel(OrderEntity.name) private readonly orderModel: Model<OrderEntity>) {
+        this.client = ClientProxyFactory.create({
+            transport: Transport.RMQ,
+            options: {
+                urls: ['amqp://localhost:5672'],
+                queue: 'orders_retrieved',
+                queueOptions: {
+                    durable: false,
+                },
+            },
+        });
+    }
+
+    sendMessage(data: any) {
+        return this.client.send('orders_retrieved', data);
+    }
     // Création à chaque étape du swagger avec sa méthode et ses infos
     @Post()
     @ApiOperation({ summary: 'Créer une nouvelle commande' })
@@ -21,20 +37,28 @@ export class OrdersService {
     @ApiBody({ type: CreateOrderDto })
     async create(createOrderDto: CreateOrderDto): Promise<OrderEntity> {
         const order = this.orderModel.create(createOrderDto);
-       
+        const a = this.client.send('orders_retrieved', order)
+  
         return order
     }
+
 
     @Get()
     @UseGuards(AuthGuard('jwt')) // Protection de la route avec un token JWT
     @ApiOperation({ summary: 'Récupérer toutes les commandes' })
     @ApiResponse({ status: 200, description: 'Liste des commandes récupérée avec succès.' })
     async findAll(): Promise<OrderEntity[]> {
-        // Récupération de toutes les commandes
-        const order = this.orderModel.find().lean().exec();
-        
-        return order;
+        // Récupération de toutes les commandes avec `await`
+        const orders = await this.orderModel.find().lean().exec();
+    
+        if (orders.length > 0) {
+            // Envoie du premier ID trouvé à RabbitMQ
+            this.sendMessage({ orderId: orders[0]._id });
+        }
+    
+        return orders;
     }
+
 
     @Get(':id')
     @ApiOperation({ summary: 'Récupérer une commande par son ID' })
@@ -45,6 +69,7 @@ export class OrdersService {
         console.log("findOne Id:", id); // Log de l'ID pour debug
         const result = await this.orderModel.findById(id).lean().exec();
         console.log("findOne result:", result); // Log du résultat pour debug
+
         return result;
     }
 

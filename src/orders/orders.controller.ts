@@ -1,25 +1,42 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Inject } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { ThrottlerGuard } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { InjectMetric } from '@willsoto/nestjs-prometheus';
 import { Counter } from 'prom-client';
-import { EventPattern } from '@nestjs/microservices';
-import { RabbitMQService } from 'src/rabbitmq/rabbitmq.service';
+import { ClientProxy, ClientProxyFactory, EventPattern, MessagePattern, Payload, Transport } from '@nestjs/microservices';
 
 
 @Controller('orders') // Définit le chemin d'accès pour ce contrôleur
-@UseGuards(ThrottlerGuard) // Ajoute une protection contre les requêtes abusives
 export class OrdersController {
+  private client: ClientProxy;
+
   constructor(
-    private readonly rabbitMQService: RabbitMQService,
 
     private readonly ordersService: OrdersService,
     @InjectMetric('orders_requests_total') private readonly ordersRequestsTotal: Counter,
 
-  ) { }
+  ) {
+    this.client = ClientProxyFactory.create({
+      transport: Transport.RMQ,
+      options: {
+        urls: ['amqp://localhost:5672'],
+        queue: 'orders_retrieved',
+        queueOptions: {
+          durable: false,
+        },
+      },
+    });
+  }
+
+  // RabbitMq
+  @MessagePattern('orders_retrieved') // Correspond au nom de la queue RabbitMQ
+  async handleMessage(@Payload() data: any) {
+    console.log('Received message:', data);
+    return { response: `Message reçu: ${JSON.stringify(data)}` };
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
 
@@ -27,11 +44,14 @@ export class OrdersController {
     // Crée une nouvelle commande
     const order = this.ordersService.create(createOrderDto);
     this.ordersRequestsTotal.inc();
-    await this.rabbitMQService.sendOrderCreated(order);
     return order
-    
-  }
 
+  }
+  @Get('send')
+  async sendMessage() {
+    const response = await this.ordersService.sendMessage({ text: 'Hello RabbitMQ!' }).toPromise();
+    return response;
+  }
   @Get()
   @UseGuards(JwtAuthGuard)
 
@@ -39,7 +59,10 @@ export class OrdersController {
     this.ordersRequestsTotal.inc();
 
     // Récupère toutes les commandes
-    return this.ordersService.findAll();
+    const orders = await this.ordersService.findAll();
+    this.client.emit('orders_retrieved', orders);
+    return orders;
+
   }
 
   @Get(':id')
