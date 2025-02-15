@@ -4,15 +4,14 @@ import { OrdersService } from './orders.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OrderEntity, OrderSchema } from './entitites/order.entity';
 import { PrometheusModule, makeCounterProvider } from '@willsoto/nestjs-prometheus';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { RabbitMQService } from 'src/rabbitmq/rabbitmq.service';
-import { RabbitMQModule } from 'src/rabbitmq/rabbitmq.module';
+import { ClientProxyFactory, ClientsModule, Transport } from '@nestjs/microservices';
+
 
 @Module({
   imports: [
-    RabbitMQModule,
     PrometheusModule.register(),
     MongooseModule.forFeature([{ name: OrderEntity.name, schema: OrderSchema }]),
+    
   ],
   controllers: [OrdersController],
   providers: [

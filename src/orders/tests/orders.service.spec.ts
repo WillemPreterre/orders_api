@@ -5,7 +5,6 @@ import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
 import { getModelToken } from '@nestjs/mongoose';
 import { OrderEntity } from '../entitites/order.entity';
-import { ThrottlerModule } from '@nestjs/throttler';
 import { OrdersController } from '../orders.controller';
 describe('OrdersService', () => {
     // Déclaration des variables
@@ -36,15 +35,7 @@ describe('OrdersService', () => {
     // Création du module de test
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            imports: [ThrottlerModule.forRoot({
-                throttlers: [
-                    {
-                        name: 'default',
-                        ttl: 60,
-                        limit: 10,
-                    },
-                ],
-            })],
+            imports: [],
             controllers: [OrdersController],
             providers: [
                 OrdersService,
