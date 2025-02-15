@@ -31,12 +31,14 @@ describe('OrdersController', () => {
       controllers: [OrdersController],
       providers: [
         { provide: OrdersService, useValue: mockOrdersService },
-
         {
-          provide: 'THROTTLER:MODULE_OPTIONS',
-          useValue: { ttl: 60, limit: 10 },
-        },
+          provide: 'PROM_METRIC_ORDERS_REQUESTS_TOTAL', 
+          useValue: {
+              inc: jest.fn(), // Simule la méthode `inc()` de Prometheus
+          },
+      },
       ],
+      
     }).compile();
 
     controller = module.get<OrdersController>(OrdersController);

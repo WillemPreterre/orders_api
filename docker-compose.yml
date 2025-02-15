@@ -13,7 +13,7 @@ services:
     environment:
       NODE_ENV: production
       MONGO_URI: "mongodb://mongo:27017/test/orders"
-      RABBITMQ_URL: "amqp://rabbitmq"
+      RABBITMQ_URL: "amqp://rabbitmq-orders:5672"
     networks:
       - app_network
 

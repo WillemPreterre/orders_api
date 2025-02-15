@@ -43,7 +43,12 @@ describe('OrdersService', () => {
                     provide: getModelToken(OrderEntity.name),
                     useValue: mockOrderModel,
                 },
-
+                {
+                    provide: 'PROM_METRIC_ORDERS_REQUESTS_TOTAL', // 💡 Mock de la métrique Prometheus
+                    useValue: {
+                        inc: jest.fn(), // Simule la méthode `inc()` de Prometheus
+                    },
+                },
             ],
         }).compile();
 

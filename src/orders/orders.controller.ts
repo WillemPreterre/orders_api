@@ -44,6 +44,8 @@ export class OrdersController {
     // Crée une nouvelle commande
     const order = this.ordersService.create(createOrderDto);
     this.ordersRequestsTotal.inc();
+    this.client.emit('orders_retrieved', order);
+
     return order
 
   }
@@ -69,7 +71,8 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
 
   async findOne(@Param('id') id: string) {
-    this.ordersRequestsTotal.inc();
+   const order = this.ordersRequestsTotal.inc();
+    this.client.emit('orders_retrieved', order);
 
     // Récupère une commande par son ID
     return this.ordersService.findOne(id);
@@ -79,7 +82,8 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
 
   async update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    this.ordersRequestsTotal.inc();
+    const order = this.ordersRequestsTotal.inc();
+    this.client.emit('orders_retrieved', order);
 
     // Met à jour une commande existante
     return this.ordersService.update(id, updateOrderDto);
@@ -89,7 +93,8 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
 
   async remove(@Param('id') id: string) {
-    this.ordersRequestsTotal.inc();
+    const order = this.ordersRequestsTotal.inc();
+    this.client.emit('orders_retrieved', order);
 
     // Supprime une commande par son ID
     return this.ordersService.remove(id);

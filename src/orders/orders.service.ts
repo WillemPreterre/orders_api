@@ -14,6 +14,7 @@ export class OrdersService {
     private client: ClientProxy;
 
     constructor(@InjectModel(OrderEntity.name) private readonly orderModel: Model<OrderEntity>) {
+
         this.client = ClientProxyFactory.create({
             transport: Transport.RMQ,
             options: {

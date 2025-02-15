@@ -6,7 +6,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 async function bootstrap() {
   // Création de l'application HTTP principale (Swagger inclus)
   const app = await NestFactory.create(AppModule);
-
+  
   // Configuration de Swagger
   const config = new DocumentBuilder()
     .setTitle('PayeTonKawa API')
@@ -21,7 +21,7 @@ async function bootstrap() {
   const microservice = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     transport: Transport.RMQ,
     options: {
-      urls: ['amqp://localhost:5672'], // Remplace par ton broker si nécessaire
+      urls: ['amqp://localhost:5672'],
       queue: 'orders_retrieved',
       queueOptions: {
         durable: false,
