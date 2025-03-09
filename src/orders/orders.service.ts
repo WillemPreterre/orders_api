@@ -19,17 +19,15 @@ export class OrdersService {
             transport: Transport.RMQ,
             options: {
                 urls: ['amqp://localhost:5672'],
-                queue: 'orders_retrieved',
+                queue: 'order_retrieved',
                 queueOptions: {
-                    durable: false,
+                    durable: true,
                 },
             },
         });
     }
 
-    sendMessage(data: any) {
-        return this.client.send('orders_retrieved', data);
-    }
+
     // Création à chaque étape du swagger avec sa méthode et ses infos
     @Post()
     @ApiOperation({ summary: 'Créer une nouvelle commande' })
@@ -37,10 +35,9 @@ export class OrdersService {
     @ApiResponse({ status: 400, description: 'Requête invalide.' })
     @ApiBody({ type: CreateOrderDto })
     async create(createOrderDto: CreateOrderDto): Promise<OrderEntity> {
-        const order = this.orderModel.create(createOrderDto);
-        const a = this.client.send('orders_retrieved', order)
-  
-        return order
+        const order = await this.orderModel.create(createOrderDto);
+        this.client.emit('order_retrieved', order);
+        return order;
     }
 
 
@@ -51,12 +48,7 @@ export class OrdersService {
     async findAll(): Promise<OrderEntity[]> {
         // Récupération de toutes les commandes avec `await`
         const orders = await this.orderModel.find().lean().exec();
-    
-        if (orders.length > 0) {
-            // Envoie du premier ID trouvé à RabbitMQ
-            this.sendMessage({ orderId: orders[0]._id });
-        }
-    
+
         return orders;
     }
 
@@ -82,7 +74,9 @@ export class OrdersService {
     @ApiBody({ type: UpdateOrderDto })
     async update(id: string, updateOrderDto: UpdateOrderDto): Promise<OrderEntity | null> {
         // Mise à jour d'une commande existante
-        return this.orderModel.findByIdAndUpdate(id, updateOrderDto, { new: true }).lean().exec();
+        const updatedOrder = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, { new: true }).lean().exec();
+
+        return updatedOrder;
     }
 
     @Delete(':id')
@@ -92,6 +86,8 @@ export class OrdersService {
     @ApiParam({ name: 'id', description: 'ID de la commande', type: String })
     async remove(id: string): Promise<OrderEntity | null> {
         // Suppression d'une commande par son ID
-        return this.orderModel.findByIdAndDelete(id).lean().exec();
+        const deletedOrder = await this.orderModel.findByIdAndDelete(id).lean().exec();
+
+        return deletedOrder;
     }
 }

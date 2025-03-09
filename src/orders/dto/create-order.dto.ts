@@ -2,17 +2,6 @@ import { IsArray, IsNotEmpty, IsNumber, IsString, IsUUID, ValidateNested } from 
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
-// DTO pour un produit dans une commande
-class ProductDto {
-    @IsString()
-    @IsNotEmpty()
-    productId: string;
-
-    @IsNumber()
-    @IsNotEmpty()
-    quantity: number;
-}
-
 // DTO pour la création d'une commande
 export class CreateOrderDto {
     @ApiProperty({
@@ -21,18 +10,17 @@ export class CreateOrderDto {
         required: true,
     })
     @IsUUID('4', { message: 'L\'ID de la commande doit être un UUID valide' })
-    orderId: string;
+    _id: string;
 
     @ApiProperty({ example: '12345', description: 'ID du client' })
     @IsString()
     @IsNotEmpty()
     customerId: string;
 
-    @ApiProperty({ type: [ProductDto], description: 'Liste des produits commandés' })
+    @ApiProperty({  description: 'Liste des produits commandés' })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => ProductDto)
-    products: ProductDto[];
+    items: Array<any>;
 
     @ApiProperty({ example: 50.99, description: 'Montant total de la commande' })
     @IsNumber()

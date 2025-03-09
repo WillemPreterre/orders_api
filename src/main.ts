@@ -22,15 +22,17 @@ async function bootstrap() {
     transport: Transport.RMQ,
     options: {
       urls: ['amqp://localhost:5672'],
-      queue: 'orders_retrieved',
+      queue: 'order_retrieved',
       queueOptions: {
-        durable: false,
+        durable: true,
       },
     },
   });
 
+  microservice.listen();
+  console.log('Microservice is listening for messages from RabbitMQ');
+
   // Lancer les deux applications
-  await microservice.listen(); // Lancement du microservice RabbitMQ
   await app.listen(process.env.PORT ?? 3000); // Lancement de l'application HTTP
 }
 

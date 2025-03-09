@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-dotenv.config({ path: '../.env' }); // Charge le fichier manuellement
+dotenv.config({ path: '../.env' });
 
 const payload = {
     sub: '1234567890',
@@ -8,7 +8,7 @@ const payload = {
 };
 
 
-const secret = process.env.SECRET_KEY; // Utilisation de la clé du .env
+const secret = process.env.SECRET_KEY; 
 
 const token = jwt.sign(payload, secret, { expiresIn: '1h' });
 

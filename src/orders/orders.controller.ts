@@ -22,37 +22,24 @@ export class OrdersController {
       transport: Transport.RMQ,
       options: {
         urls: ['amqp://localhost:5672'],
-        queue: 'orders_retrieved',
+        queue: 'order_retrieved',
         queueOptions: {
-          durable: false,
+          durable: true,
         },
       },
     });
   }
 
-  // RabbitMq
-  @MessagePattern('orders_retrieved') // Correspond au nom de la queue RabbitMQ
-  async handleMessage(@Payload() data: any) {
-    console.log('Received message:', data);
-    return { response: `Message reçu: ${JSON.stringify(data)}` };
-  }
 
   @Post()
   @UseGuards(JwtAuthGuard)
 
   async create(@Body() createOrderDto: CreateOrderDto) {
     // Crée une nouvelle commande
-    const order = this.ordersService.create(createOrderDto);
+    const order = await this.ordersService.create(createOrderDto);
     this.ordersRequestsTotal.inc();
-    this.client.emit('orders_retrieved', order);
-
+    this.client.emit('order_retrieved', order);
     return order
-
-  }
-  @Get('send')
-  async sendMessage() {
-    const response = await this.ordersService.sendMessage({ text: 'Hello RabbitMQ!' }).toPromise();
-    return response;
   }
   @Get()
   @UseGuards(JwtAuthGuard)
@@ -62,7 +49,6 @@ export class OrdersController {
 
     // Récupère toutes les commandes
     const orders = await this.ordersService.findAll();
-    this.client.emit('orders_retrieved', orders);
     return orders;
 
   }
@@ -71,8 +57,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
 
   async findOne(@Param('id') id: string) {
-   const order = this.ordersRequestsTotal.inc();
-    this.client.emit('orders_retrieved', order);
+    const order = this.ordersRequestsTotal.inc();
 
     // Récupère une commande par son ID
     return this.ordersService.findOne(id);
@@ -83,7 +68,6 @@ export class OrdersController {
 
   async update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
     const order = this.ordersRequestsTotal.inc();
-    this.client.emit('orders_retrieved', order);
 
     // Met à jour une commande existante
     return this.ordersService.update(id, updateOrderDto);
@@ -94,8 +78,6 @@ export class OrdersController {
 
   async remove(@Param('id') id: string) {
     const order = this.ordersRequestsTotal.inc();
-    this.client.emit('orders_retrieved', order);
-
     // Supprime une commande par son ID
     return this.ordersService.remove(id);
   }

@@ -2,15 +2,15 @@ import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, ValidateNe
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
-class ProductDto {
-    @IsString()
-    @IsNotEmpty()
-    productId: string;
+// class ProductDto {
+//     @IsString()
+//     @IsNotEmpty()
+//     productId: string;
 
-    @IsNumber()
-    @IsNotEmpty()
-    quantity: number;
-}
+//     @IsNumber()
+//     @IsNotEmpty()
+//     quantity: number;
+// }
 
 export class UpdateOrderDto {
     @ApiProperty({
@@ -19,19 +19,18 @@ export class UpdateOrderDto {
         required: true,
     })
     @IsUUID('4', { message: 'L\'ID de la commande doit être un UUID valide' }) 
-    orderId: string;
+    _id: string;
 
     @ApiProperty({ example: '12345', description: 'ID du client', required: false })
     @IsString()
     @IsOptional()
     customerId?: string;
 
-    @ApiProperty({ type: [ProductDto], description: 'Liste des produits commandés', required: false })
+    @ApiProperty({ description: 'Liste des produits commandés', required: false })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => ProductDto)
     @IsOptional()
-    products?: ProductDto[];
+    items?: Array<any>;
 
     @ApiProperty({ example: 50.99, description: 'Montant total de la commande', required: false })
     @IsNumber()

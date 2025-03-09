@@ -2,15 +2,17 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersController } from '../orders.controller';
 import { OrdersService } from '../orders.service';
 import { CreateOrderDto } from '../dto/create-order.dto';
+import { ClientProxy } from '@nestjs/microservices';
 
 describe('OrdersController', () => {
   let controller: OrdersController;
   let service: OrdersService;
+  let client: ClientProxy;
 
   const mockOrder = {
-    orderId: '123e4567-e89b-12d3-a456-426614174000',
+    _id: '123e4567-e89b-12d3-a456-426614174000',
     customerId: '12345',
-    products: [{ productId: 'produit1', quantity: 2 }],
+    items: ['67cd7eade42a44b0a158931a'],
     totalAmount: 50.99,
     status: 'En cours',
   };
@@ -26,8 +28,6 @@ describe('OrdersController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [],
-
-
       controllers: [OrdersController],
       providers: [
         { provide: OrdersService, useValue: mockOrdersService },
@@ -36,13 +36,20 @@ describe('OrdersController', () => {
           useValue: {
               inc: jest.fn(), // Simule la méthode `inc()` de Prometheus
           },
-      },
+        },
+        {
+          provide: 'RABBITMQ_SERVICE',
+          useValue: {
+            emit: jest.fn(),
+          },
+        },
       ],
       
     }).compile();
 
     controller = module.get<OrdersController>(OrdersController);
     service = module.get<OrdersService>(OrdersService);
+    client = module.get<ClientProxy>('RABBITMQ_SERVICE');
   });
 
   it('Défini le controller', () => {
@@ -51,11 +58,11 @@ describe('OrdersController', () => {
 
   it('Créer une commande', async () => {
     const dto: CreateOrderDto = {
-      orderId: '123e4567-e89b-12d3-a456-426614174000',
+      _id: '123e4567-e89b-12d3-a456-426614174000',
       customerId: '12345',
-      products: [{ productId: 'prod1', quantity: 2 }],
+      items: ["67cd7eade42a44b0a158931a"],
       totalAmount: 50.99,
-      status: 'pending',
+      status: 'en cours',
     };
     expect(await controller.create(dto)).toEqual(mockOrder);
     expect(service.create).toHaveBeenCalledWith(dto);
