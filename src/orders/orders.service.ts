@@ -11,21 +11,11 @@ import { ClientProxy, ClientProxyFactory, Transport } from "@nestjs/microservice
 @Injectable()
 export class OrdersService {
     // Injection du modèle OrderEntity pour interagir avec MongoDB
-    private client: ClientProxy;
 
-    constructor(@InjectModel(OrderEntity.name) private readonly orderModel: Model<OrderEntity>) {
-
-        this.client = ClientProxyFactory.create({
-            transport: Transport.RMQ,
-            options: {
-                urls: ['amqp://localhost:5672'],
-                queue: 'order_retrieved',
-                queueOptions: {
-                    durable: true,
-                },
-            },
-        });
-    }
+    constructor(
+        @InjectModel(OrderEntity.name) private readonly orderModel: Model<OrderEntity>,
+        @Inject('RABBITMQ_SERVICE') private readonly client: ClientProxy,
+    ) { }
 
 
     // Création à chaque étape du swagger avec sa méthode et ses infos
@@ -40,7 +30,6 @@ export class OrdersService {
         return order;
     }
 
-
     @Get()
     @UseGuards(AuthGuard('jwt')) // Protection de la route avec un token JWT
     @ApiOperation({ summary: 'Récupérer toutes les commandes' })
@@ -51,7 +40,6 @@ export class OrdersService {
 
         return orders;
     }
-
 
     @Get(':id')
     @ApiOperation({ summary: 'Récupérer une commande par son ID' })

@@ -62,33 +62,32 @@ describe('OrdersService', () => {
         service = module.get<OrdersService>(OrdersService);
         client = module.get<ClientProxy>('RABBITMQ_SERVICE');
     });
-    
+
     it('Défini', () => {
         expect(service).toBeDefined();
     });
 
     // Test de la méthode create
-    describe('create', () => {
-        it('Créer une commande', async () => {
-            const createOrderDto: CreateOrderDto = {
-                _id: '123e4567-e89b-12d3-a456-426614174000',
-                customerId: '12345',
-                items: ["67cd7eade42a44b0a158931a"],
-                totalAmount: 50.99,
-                status: 'En cours',
-            };
-
-            const result = await service.create(createOrderDto);
-
-            expect(result).toEqual(mockOrder);
-
-            expect(mockOrderModel.create).toHaveBeenCalledWith(createOrderDto);
-            expect(client.emit).toHaveBeenCalledWith('order_retrieved', mockOrder);
-
-        });
+    it('Créer une commande', async () => {
+        const createOrderDto: CreateOrderDto = {
+            _id: '123e4567-e89b-12d3-a456-426614174000',
+            customerId: '12345',
+            items: ["67cd7eade42a44b0a158931a"],
+            totalAmount: 50.99,
+            status: 'En cours',
+        };
+    
+        const result = await service.create(createOrderDto);
+    
+        expect(result).toEqual(mockOrder);
+        expect(mockOrderModel.create).toHaveBeenCalledWith(createOrderDto);
+    
+        expect(client.emit).toHaveBeenCalledTimes(1); // Ensure emit is called once
+        expect(client.emit).toHaveBeenCalledWith('order_retrieved', mockOrder);
     });
+    
     // Test de la méthode findAll
-    describe('findAll', () => {
+    describe('Trouver toutes les commandes', () => {
         it('Retourne toutes les commandes', async () => {
             const result = await service.findAll();
             expect(result).toEqual([mockOrder]); // Vérifie que le résultat est égal à la commande mockée
@@ -96,7 +95,7 @@ describe('OrdersService', () => {
         });
     });
     // Test de la méthode findOne
-    describe('findOne', () => {
+    describe('Trouver une commande', () => {
         it('Retourne une commande', async () => {
             const result = await service.findOne('123e4567-e89b-12d3-a456-426614174000');
             expect(result).toEqual(mockOrder);
@@ -110,7 +109,7 @@ describe('OrdersService', () => {
         });
     });
     // Test de la méthode update
-    describe('update', () => {
+    describe('Modifie une commande', () => {
         it('Update une commande', async () => {
             const updateOrderDto: UpdateOrderDto = { _id: '123e4567-e89b-12d3-a456-426614174000', status: "Terminé" };
             const result = await service.update('123e4567-e89b-12d3-a456-426614174000', updateOrderDto);
@@ -126,7 +125,7 @@ describe('OrdersService', () => {
         });
     });
     // Test de la méthode remove
-    describe('remove', () => {
+    describe('Supprime une commande', () => {
         it('Supprime une commande', async () => {
             const result = await service.remove('123e4567-e89b-12d3-a456-426614174000');
             expect(result).toEqual(mockOrder);

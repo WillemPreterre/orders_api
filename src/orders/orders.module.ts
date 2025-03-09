@@ -11,7 +11,19 @@ import { ClientProxyFactory, ClientsModule, Transport } from '@nestjs/microservi
   imports: [
     PrometheusModule.register(),
     MongooseModule.forFeature([{ name: OrderEntity.name, schema: OrderSchema }]),
-    
+    ClientsModule.register([
+      {
+        name: 'RABBITMQ_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://localhost:5672'], // Change if needed
+          queue: 'order_retrieved',
+          queueOptions: {
+            durable: true,
+          },
+        },
+      },
+    ]),
   ],
   controllers: [OrdersController],
   providers: [
